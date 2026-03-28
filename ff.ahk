@@ -5,6 +5,11 @@
 A_HotkeyInterval := 1000
 A_MaxHotkeysPerInterval := 1000
 
+; Attempt to improve event reliability
+#UseHook
+InstallKeybdHook()
+ProcessSetPriority("High")
+
 ; Pair of key down/up helper functions to suppress OS repeated keydowns, and to monitor virtual held state
 register0 := false
 register1 := false
@@ -20,7 +25,6 @@ register10 := false
 register11 := false
 keyDownSuppression(index) {
 	global
-	OutputDebug("down " . index . "`n")
 
 	switch index {
 		case 0:
@@ -89,7 +93,6 @@ keyDownSuppression(index) {
 }
 keyUpSuppression(index) {
 	global
-	OutputDebug("UP " . index . "`n")
 
 	switch index {
 		case 0:
@@ -163,6 +166,8 @@ keyDown(index, loopKey, pressEvery := 250, holdFor := 75) {
 		return
 	}
 
+	OutputDebug(A_TickCount . " down " . index . "`n")
+
 	work() {
 		; Proxy send now
 		if (failsafe(index)) {
@@ -186,6 +191,8 @@ keyDown(index, loopKey, pressEvery := 250, holdFor := 75) {
 }
 keyUp(index, loopKey) {
 	global loopMap
+
+	OutputDebug(A_TickCount . " UP " . index . "`n")
 
 	; Clear existing timer, if any
 	if loopMap.Has(loopKey) {
@@ -246,9 +253,15 @@ register(masterKey, loopKey) {
 	; Remember the index at time of call
 	index := i
 
-	eventName := "*" . masterKey
-	Hotkey(eventName, (*) => keyDown(index, loopKey))
-	Hotkey(eventName . " Up", (*) => keyUp(index, loopKey))
+	Hotkey(masterKey, (*) => keyDown(index, loopKey))
+	Hotkey(masterKey . " Up", (*) => keyUp(index, loopKey))
+	Hotkey("+" . masterKey, (*) => keyDown(index, loopKey))
+	Hotkey("+" . masterKey . " Up", (*) => keyUp(index, loopKey))
+	Hotkey("!" . masterKey, (*) => keyDown(index, loopKey))
+	Hotkey("!" . masterKey . " Up", (*) => keyUp(index, loopKey))
+	Hotkey("^" . masterKey, (*) => keyDown(index, loopKey))
+	Hotkey("^" . masterKey . " Up", (*) => keyUp(index, loopKey))
+
 	i++
 }
 register("F13", "p")
