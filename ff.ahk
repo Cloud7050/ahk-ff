@@ -20,6 +20,7 @@ register10 := false
 register11 := false
 keyDownSuppression(index) {
 	global
+	OutputDebug("down " . index . "`n")
 
 	switch index {
 		case 0:
@@ -88,6 +89,7 @@ keyDownSuppression(index) {
 }
 keyUpSuppression(index) {
 	global
+	OutputDebug("UP " . index . "`n")
 
 	switch index {
 		case 0:
@@ -244,7 +246,7 @@ register(masterKey, loopKey) {
 	; Remember the index at time of call
 	index := i
 
-	eventName := "$*" . masterKey
+	eventName := "*" . masterKey
 	Hotkey(eventName, (*) => keyDown(index, loopKey))
 	Hotkey(eventName . " Up", (*) => keyUp(index, loopKey))
 	i++
