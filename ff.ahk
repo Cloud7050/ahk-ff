@@ -25,15 +25,15 @@ keyUpSuppression(masterKey) {
 	uDeleteKey(masterMap, masterKey)
 }
 
-loopMap := Map()
+workTimer := unset
+workKey := unset
 keyDown(masterKey, loopKey, pressEvery := 250, holdFor := 75) {
-	global loopMap
+	global workTimer, workKey
 
-	; Supress OS repeats
+	; Suppress OS repeats
 	if keyDownSuppression(masterKey) {
 		return
 	}
-
 	OutputDebug(A_TickCount . " down " . masterKey . "`n")
 
 	work() {
@@ -41,62 +41,63 @@ keyDown(masterKey, loopKey, pressEvery := 250, holdFor := 75) {
 		keyDownSend(loopKey, holdFor)
 
 		; Clear existing timer, if any
-		if loopMap.Has(loopKey) {
-			uCancelTimer(loopMap[loopKey])
+		if IsSet(workTimer) {
+			uCancelTimer(workTimer)
 		}
 		; Schedule loop
 		function := () => work()
 		SetTimer(function, pressEvery)
-		loopMap[loopKey] := function
+		workTimer := function
+		workKey := loopKey
 	}
 	work()
 }
 keyUp(masterKey, loopKey) {
-	global loopMap
+	global workTimer, workKey
 
 	OutputDebug(A_TickCount . " UP " . masterKey . "`n")
 
-	; Clear existing timer, if any
-	if loopMap.Has(loopKey) {
-		uCancelTimer(loopMap[loopKey])
-		loopMap.Delete(loopKey)
+	; Clear existing timer, but only if it's your own
+	if IsSet(workTimer) && workKey == loopKey {
+		uCancelTimer(workTimer)
+		workTimer := unset
+		workKey := unset
 	}
 
 	; Cleanup for proxy send now
 	keyUpSend(loopKey)
 
-	; Cleanup for supress OS repeats
+	; Cleanup for suppress OS repeats
 	keyUpSuppression(masterKey)
 }
 
 ; Pair of key up/down helper functions to safely proxy key sends with varying hold lengths
-upMap := Map()
+upTimer := unset
 keyDownSend(key, delay) {
-	global upMap
+	global upTimer
+
+	; Explicitly force other key up early, if needed
+	keyUpSend()
 
 	; Key down now
 	Send("{Blind}{" . key . " down}")
 
-	; Clear existing timer, if any
-	if upMap.Has(key) {
-		uCancelTimer(upMap[key])
-	}
-
 	; Schedule key up
 	function := () => Send("{Blind}{" . key . " up}")
 	SetTimer(function, delay)
-	upMap[key] := function
+	upTimer := function
 }
-keyUpSend(key) {
-	global upMap
+keyUpSend(key := unset) {
+	global upTimer
+
+	isForceDetonate := !IsSet(key)
 
 	; Detonate existing timer, if any
-	if upMap.Has(key) {
-		function := upMap[key]
-		uCancelTimer(upMap[key])
+	if isForceDetonate && IsSet(upTimer) {
+		uCancelTimer(upTimer)
 		; Trigger it now manually
-		function()
-		upMap.Delete(key)
+		upTimer()
+		upTimer := unset
 	}
 }
 
