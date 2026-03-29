@@ -89,7 +89,7 @@ class KeyManager {
 	}
 
 	healthCheck() {
-		if this.isMasterHeld && !GetKeyState(this.masterKey) {
+		if !this.isMasterHeld || !GetKeyState(this.masterKey) {
 			warn("FAKE TRIGGER:")
 			this.onMasterUp()
 			return true
