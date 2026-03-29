@@ -6,6 +6,7 @@ A_HotkeyInterval := 1000
 A_MaxHotkeysPerInterval := 1000
 
 ; Attempt to improve event reliability
+#MaxThreads 20
 InstallKeybdHook()
 ProcessSetPriority("High")
 
@@ -24,6 +25,16 @@ keyUpSuppression(masterKey) {
 
 	uDeleteKey(masterMap, masterKey)
 }
+unstuckCheck(masterKey) {
+	global masterMap
+
+	if !GetKeyState(masterKey) {
+		keyUpSuppression(masterKey)
+		OutputDebug(A_TickCount . " STUCK: FAKE UP " . masterKey . "`n")
+
+		return true
+	}
+}
 
 workTimer := unset
 workKey := unset
@@ -37,6 +48,10 @@ keyDown(masterKey, loopKey, pressEvery := 250, holdFor := 75) {
 	OutputDebug(A_TickCount . " down " . masterKey . "`n")
 
 	work() {
+		if (unstuckCheck(masterKey)) {
+			return
+		}
+
 		; Proxy send now
 		keyDownSend(loopKey, holdFor)
 
@@ -46,7 +61,7 @@ keyDown(masterKey, loopKey, pressEvery := 250, holdFor := 75) {
 		}
 		; Schedule loop
 		function := () => work()
-		SetTimer(function, pressEvery)
+		SetTimer(function, -pressEvery)
 		workTimer := function
 		workKey := loopKey
 	}
@@ -111,8 +126,8 @@ uDeleteKey(map, key) {
 }
 
 register(masterKey, loopKey) {
-	Hotkey("$*" . masterKey, (*) => keyDown(masterKey, loopKey))
-	Hotkey("$*" . masterKey . " Up", (*) => keyUp(masterKey, loopKey))
+	Hotkey("$~*" . masterKey, (*) => keyDown(masterKey, loopKey))
+	Hotkey("$~*" . masterKey . " Up", (*) => keyUp(masterKey, loopKey))
 }
 register("F13", "p")
 register("F14", "[")
