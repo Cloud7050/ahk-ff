@@ -6,130 +6,178 @@ A_HotkeyInterval := 1000
 A_MaxHotkeysPerInterval := 1000
 
 ; Attempt to improve event reliability
-#MaxThreadsPerHotkey 5
-#MaxThreads 30
-InstallKeybdHook()
+#MaxThreadsPerHotkey 10
+#MaxThreads 50
 ProcessSetPriority("High")
 
-; Pair of key down/up helper functions to suppress OS repeated keydowns, and to monitor virtual held state
-masterMap := Map()
-keyDownSuppression(masterKey) {
-	global masterMap
+class KeyManager {
+	isMasterHeld := false
 
-	if masterMap.Has(masterKey) {
-		return true
+	callback := ''
+	sender := ''
+
+	__New(masterKey, loopKey) {
+		this.masterKey := masterKey
+		this.loopKey := loopKey
 	}
-	masterMap[masterKey] := true
-}
-keyUpSuppression(masterKey) {
-	global masterMap
 
-	uDeleteKey(masterMap, masterKey)
-}
-unstuckCheck(masterKey) {
-	global masterMap
-
-	if !GetKeyState(masterKey) {
-		keyUpSuppression(masterKey)
-		OutputDebug(A_TickCount . " STUCK: FAKE UP " . masterKey . "`n")
-
-		return true
-	}
-}
-
-workTimer := unset
-workKey := unset
-keyDown(masterKey, loopKey, pressEvery := 250, holdFor := 75) {
-	global workTimer, workKey
-
-	; Suppress OS repeats
-	if keyDownSuppression(masterKey) {
-		return
-	}
-	OutputDebug(A_TickCount . " down " . masterKey . "`n")
-
-	work() {
-		if (unstuckCheck(masterKey)) {
+	onMasterDown() {
+		if this.isMasterHeld {
+			; Suppress OS repeats if already held
 			return
 		}
 
-		; Proxy send now
-		keyDownSend(loopKey, holdFor)
+		info("down " this.masterKey "/" this.loopKey)
 
-		; Clear existing timer, if any
-		if IsSet(workTimer) {
-			uCancelTimer(workTimer)
+		this.isMasterHeld := true
+		this.doMasterDown()
+	}
+
+	doMasterDown() {
+		PRESS_EVERY := 250
+		HEALTH_CHECK := 25
+
+		; Do master up first, to be safe
+		this.doMasterUp()
+		this.send()
+
+		; Schedule subsequent work
+		work(executeAt) {
+			; Health check to force up event if needed
+			if (this.healthCheck()) {
+				; Abort and terminate if failed health check
+				return
+			}
+
+			; Proceed to do down work, if appropriate
+			if (A_TickCount >= executeAt) {
+				executeAt := A_TickCount + PRESS_EVERY
+
+				; Do master up first, to be safe
+				this.doMasterUp()
+				this.send()
+			}
+
+			; Schedule subsequent work
+			callback := () => work(executeAt)
+			setTimeout(callback, Min(HEALTH_CHECK, executeAt - A_TickCount))
+			this.callback := callback
 		}
-		; Schedule loop
-		function := () => work()
-		SetTimer(function, -pressEvery)
-		workTimer := function
-		workKey := loopKey
-	}
-	work()
-}
-keyUp(masterKey, loopKey) {
-	global workTimer, workKey
-
-	OutputDebug(A_TickCount . " UP " . masterKey . "`n")
-
-	; Clear existing timer, but only if it's your own
-	if IsSet(workTimer) && workKey == loopKey {
-		uCancelTimer(workTimer)
-		workTimer := unset
-		workKey := unset
+		executeAt := A_TickCount + PRESS_EVERY
+		callback := () => work(executeAt)
+		setTimeout(callback, Min(HEALTH_CHECK, executeAt - A_TickCount))
+		this.callback := callback
 	}
 
-	; Cleanup for proxy send now
-	keyUpSend(loopKey)
+	onMasterUp() {
+		info("UP " this.masterKey "/" this.loopKey)
 
-	; Cleanup for suppress OS repeats
-	keyUpSuppression(masterKey)
-}
+		this.doMasterUp()
+		this.isMasterHeld := false
+	}
 
-; Pair of key up/down helper functions to safely proxy key sends with varying hold lengths
-upTimer := unset
-keyDownSend(key, delay) {
-	global upTimer
+	doMasterUp() {
+		; Clear existing work, if any
+		if this.callback {
+			clearTimeout(this.callback)
+			this.callback := ''
+		}
+	}
 
-	; Explicitly force other key up early, if needed
-	keyUpSend()
+	healthCheck() {
+		if this.isMasterHeld && !GetKeyState(this.masterKey) {
+			warn("FAKE TRIGGER:")
+			this.onMasterUp()
+			return true
+		}
+	}
 
-	; Key down now
-	Send("{Blind}{" . key . " down}")
+	send() {
+		if this.sender {
+			; Sender could be stale, but we always detonate (possibly early).
+			; The method should ignore late detonation if already done.
+			this.sender.detonate()
+		}
 
-	; Schedule key up
-	function := () => Send("{Blind}{" . key . " up}")
-	SetTimer(function, delay)
-	upTimer := function
-}
-keyUpSend(key := unset) {
-	global upTimer
-
-	isForceDetonate := !IsSet(key)
-
-	; Detonate existing timer, if any
-	if isForceDetonate && IsSet(upTimer) {
-		uCancelTimer(upTimer)
-		; Trigger it now manually
-		upTimer()
-		upTimer := unset
+		this.sender := Sender(this.loopKey)
 	}
 }
 
-uCancelTimer(timer) {
+class Sender {
+	__New(key) {
+		this.key := key
+
+		; Down now
+		this.down()
+
+		; Schedule up
+		HOLD_FOR := 75
+
+		this.callback := () => this.detonate()
+		setTimeout(this.callback, HOLD_FOR)
+	}
+
+	down() {
+		info("send " this.key)
+		Send("{Blind}{" this.key " down}")
+	}
+
+	up() {
+		Send("{Blind}{" this.key " up}")
+	}
+
+	detonate() {
+		if this.callback {
+			clearTimeout(this.callback)
+			this.callback := ''
+
+			this.up()
+		}
+	}
+}
+
+; Utility functions
+setTimeout(callback, delay) {
+	SetTimer(callback, -delay)
+}
+clearTimeout(timer) {
 	SetTimer(timer, 0)
 }
-uDeleteKey(map, key) {
-	if map.Has(key) {
-		map.Delete(key)
-	}
+
+; Debug log functions
+info(message) {
+	OutputDebug(A_TickCount " [INF] " message "`n")
+}
+warn(message) {
+	OutputDebug(A_TickCount " [WRN] " message "`n")
 }
 
+
+
+; Main
 register(masterKey, loopKey) {
-	Hotkey("$~*" . masterKey, (*) => keyDown(masterKey, loopKey))
-	Hotkey("$~*" . masterKey . " Up", (*) => keyUp(masterKey, loopKey))
+	manager := KeyManager(masterKey, loopKey)
+	Hotkey("~*" masterKey, (*) => manager.onMasterDown())
+	Hotkey("~*" masterKey " Up", (*) => manager.onMasterUp())
 }
+; Pair of key down/up functions to delegate each key event to its respective KeyManager
+; managerMap := Map()
+; onKeyDown(eventName, masterKey) {
+; 	if masterMap.Has(masterKey) {
+; 		manager := managerMap.Get(masterKey)
+; 		manager.onMasterDown()
+; 	} else {
+; 		warn("Hotkey " eventName " registered but no manager found!")
+; 	}
+; }
+; onKeyUp(eventName, masterKey) {
+; 	if masterMap.Has(masterKey) {
+; 		manager := managerMap.Get(masterKey)
+; 		manager.onMasterUp()
+; 	} else {
+; 		warn("Hotkey " eventName " registered but no manager found!")
+; 	}
+; }
 register("F13", "p")
 register("F14", "[")
 register("F15", "]")
