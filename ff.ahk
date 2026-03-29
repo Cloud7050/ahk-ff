@@ -6,7 +6,8 @@ A_HotkeyInterval := 1000
 A_MaxHotkeysPerInterval := 1000
 
 ; Attempt to improve event reliability
-#MaxThreads 20
+#MaxThreadsPerHotkey 5
+#MaxThreads 30
 InstallKeybdHook()
 ProcessSetPriority("High")
 
