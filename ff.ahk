@@ -9,11 +9,14 @@ A_MaxHotkeysPerInterval := 1000
 #MaxThreadsPerHotkey 10
 #MaxThreads 50
 ProcessSetPriority("High")
+Critical()
 
 class KeyManager {
 	isMasterHeld := false
 
 	callback := ''
+	lastPressed := 0
+
 	sender := ''
 
 	__New(masterKey, loopKey) {
@@ -41,6 +44,8 @@ class KeyManager {
 		this.doMasterUp()
 		this.send()
 
+		executeAt := this.lastPressed + PRESS_EVERY
+
 		; Schedule subsequent work
 		work(executeAt) {
 			; Health check to force up event if needed
@@ -51,21 +56,20 @@ class KeyManager {
 
 			; Proceed to do down work, if appropriate
 			if (A_TickCount >= executeAt) {
-				executeAt := A_TickCount + PRESS_EVERY
-
 				; Do master up first, to be safe
 				this.doMasterUp()
 				this.send()
+
+				executeAt := this.lastPressed + PRESS_EVERY
 			}
 
 			; Schedule subsequent work
 			callback := () => work(executeAt)
-			setTimeout(callback, Min(HEALTH_CHECK, executeAt - A_TickCount))
+			setTimeout(callback, Min(HEALTH_CHECK, Max(1, executeAt - A_TickCount)), -2)
 			this.callback := callback
 		}
-		executeAt := A_TickCount + PRESS_EVERY
 		callback := () => work(executeAt)
-		setTimeout(callback, Min(HEALTH_CHECK, executeAt - A_TickCount))
+		setTimeout(callback, Min(HEALTH_CHECK, Max(1, executeAt - A_TickCount)), -2)
 		this.callback := callback
 	}
 
@@ -99,13 +103,14 @@ class KeyManager {
 			this.sender.detonate()
 		}
 
-		this.sender := Sender(this.loopKey)
+		this.sender := Sender(this)
 	}
 }
 
 class Sender {
-	__New(key) {
-		this.key := key
+	__New(manager) {
+		this.manager := manager
+		this.key := manager.loopKey
 
 		; Down now
 		this.down()
@@ -114,11 +119,13 @@ class Sender {
 		HOLD_FOR := 75
 
 		this.callback := () => this.detonate()
-		setTimeout(this.callback, HOLD_FOR)
+		setTimeout(this.callback, HOLD_FOR, -1)
 	}
 
 	down() {
 		info("send " this.key)
+
+		this.manager.lastPressed := A_TickCount
 		Send("{Blind}{" this.key " down}")
 	}
 
@@ -137,8 +144,8 @@ class Sender {
 }
 
 ; Utility functions
-setTimeout(callback, delay) {
-	SetTimer(callback, -delay)
+setTimeout(callback, delay, priority := 0) {
+	SetTimer(callback, -delay, priority)
 }
 clearTimeout(timer) {
 	SetTimer(timer, 0)
@@ -160,24 +167,6 @@ register(masterKey, loopKey) {
 	Hotkey("~*" masterKey, (*) => manager.onMasterDown())
 	Hotkey("~*" masterKey " Up", (*) => manager.onMasterUp())
 }
-; Pair of key down/up functions to delegate each key event to its respective KeyManager
-; managerMap := Map()
-; onKeyDown(eventName, masterKey) {
-; 	if masterMap.Has(masterKey) {
-; 		manager := managerMap.Get(masterKey)
-; 		manager.onMasterDown()
-; 	} else {
-; 		warn("Hotkey " eventName " registered but no manager found!")
-; 	}
-; }
-; onKeyUp(eventName, masterKey) {
-; 	if masterMap.Has(masterKey) {
-; 		manager := managerMap.Get(masterKey)
-; 		manager.onMasterUp()
-; 	} else {
-; 		warn("Hotkey " eventName " registered but no manager found!")
-; 	}
-; }
 register("F13", "p")
 register("F14", "[")
 register("F15", "]")
