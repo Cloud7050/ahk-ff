@@ -86,6 +86,12 @@ class KeyManager {
 			clearTimeout(this.callback)
 			this.callback := ''
 		}
+
+		; Clean up sender, if any
+		if this.sender {
+			this.sender.detonate()
+			this.sender := ''
+		}
 	}
 
 	healthCheck() {
@@ -101,6 +107,7 @@ class KeyManager {
 			; Sender could be stale, but we always detonate (possibly early).
 			; The method should ignore late detonation if already done.
 			this.sender.detonate()
+			this.sender := ''
 		}
 
 		this.sender := Sender(this)
@@ -116,7 +123,7 @@ class Sender {
 		this.down()
 
 		; Schedule up
-		HOLD_FOR := 75
+		HOLD_FOR := 100
 
 		this.callback := () => this.detonate()
 		setTimeout(this.callback, HOLD_FOR, -1)
