@@ -5,9 +5,10 @@
 ;;; Main
 
 class Sender {
+	this.callback := ''
+
 	__New(key) {
 		this.key := key
-		this.callback := ''
 	}
 
 	static down(key) {
@@ -24,16 +25,18 @@ class Sender {
 	onInit() {
 		pressedAt := Sender.down(this.key)
 
-		this.callback := () => this.onKill()
-		setTimeout(this.callback, HOLD_FOR, PRIORITY_SENDER)
+		callback := () => this.onKill()
+		setTimeout(callback, DELAY_HOLD, PRIORITY_SENDER)
+		this.callback := callback
 
 		return pressedAt
 	}
 
 	onKill() {
 		if this.callback {
-			clearTimeout(this.callback)
+			callback := this.callback
 			this.callback := ''
+			clearTimeout(callback)
 
 			Sender.up(this.key)
 		}

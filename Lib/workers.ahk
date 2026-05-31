@@ -5,10 +5,16 @@
 ;;; Main
 
 class Worker {
+	this.manager := ''
+
 	onStart() {
 	}
 
 	onEnd() {
+	}
+
+	Init(manager) {
+		this.manager := manager
 	}
 }
 
@@ -37,5 +43,69 @@ class WorkerApp extends Worker {
 		} else {
 			Run(this.exe)
 		}
+	}
+}
+
+class WorkerLoop extends Worker {
+	callback := ''
+	sender := ''
+
+	__New(key) {
+		this.key := key
+	}
+
+	onStart() {
+		this.reset()
+		pressedAt := this.send()
+		executeAt := pressedAt + DELAY_LOOP
+
+		work(executeAt) {
+			if (!this.manager.heartbeat()) {
+				return
+			}
+
+			this.reset()
+			pressedAt := this.send()
+			executeAt := pressedAt + DELAY_LOOP
+
+			callback := () => work(executeAt)
+			setTimeout(callback, Max(1, executeAt - A_TickCount), PRIORITY_WORKER)
+			this.callback := callback
+		}
+		callback := () => work(executeAt)
+		setTimeout(callback, Max(1, executeAt - A_TickCount), PRIORITY_WORKER)
+		this.callback := callback
+	}
+
+	onEnd() {
+		this.reset()
+	}
+
+	reset() {
+		if this.callback {
+			callback := this.callback
+			this.callback := ''
+			clearTimeout(callback)
+		}
+
+		if this.sender {
+			sender := this.sender
+			this.sender := ''
+			sender.onKill()
+		}
+	}
+
+	send() {
+		if this.sender {
+			sender := this.sender
+			this.sender := ''
+			sender.onKill()
+		}
+
+		sender := Sender(this.key)
+		pressedAt := sender.onInit()
+		this.sender := sender
+
+		return pressedAt
 	}
 }

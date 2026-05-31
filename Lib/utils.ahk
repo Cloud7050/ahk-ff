@@ -1,10 +1,19 @@
 ﻿;;; Constants
 
-; How long Sender should wait before releasing its key by default
-HOLD_FOR := 100
+; How often KeyManager should poll for heartbeat
+DELAY_HEARTBEAT := 25
 
-; Sender thread priority
+; How often WorkerLoop should construct a new Sender
+DELAY_LOOP := 250
+
+; How long Sender should wait before releasing its key by default
+DELAY_HOLD := 100
+
+; Thread priorities
+
 PRIORITY_SENDER := -1
+PRIORITY_WORKER := -2
+PRIORITY_KEY_MANAGER := -3
 
 ;;; Utility functions
 

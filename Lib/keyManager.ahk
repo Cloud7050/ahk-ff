@@ -50,12 +50,12 @@
 				this.doMasterUp()
 				this.send()
 
-				executeAt := this.lastPressed + PRESS_EVERY
+				executeAt := this.lastPressed + DELAY_LOOP
 			}
 
 			; Schedule subsequent work
 			callback := () => work(executeAt)
-			setTimeout(callback, Min(HEALTH_CHECK, Max(1, executeAt - A_TickCount)), -2)
+			setTimeout(callback, Min(DELAY_HEARTBEAT, Max(1, executeAt - A_TickCount)), -2)
 			this.callback := callback
 		}
 		callback := () => work(executeAt)
