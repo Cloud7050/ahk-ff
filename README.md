@@ -20,7 +20,7 @@ A lot of mouse software is lacking or buggy. I want some looping macro functiona
   - Down: Handles a fired down event from the OS key
   - Up: Handles a fired up event from the OS key
   - Switch: Handles a fired window focus switch event
-  - Health check: While down, this is the callback to poll the real pressed state of the OS key, to manually fire the up event if needed
+  - Heartbeat: While down, this is the callback to poll the real pressed state of the OS key, to manually fire the up event if needed
 
 ### Worker
 
@@ -33,3 +33,6 @@ A lot of mouse software is lacking or buggy. I want some looping macro functiona
 
 - Senders are used by Workers to both perform an initial key down *and* schedule (or later force) a subsequent automatic key up
 - Senders are like useful standalone runnables that abstract away their internal timeout
+- Sender events:
+  - Init: The instruction to begin the Sender's behaviour, automatically run on construction
+  - Kill: The instruction to kill the Sender's behaviour, which may be called early
