@@ -91,15 +91,15 @@ class WorkerLoop extends Worker {
 		}
 
 		if this.sender {
-			sender := this.sender
+			s := this.sender
 			this.sender := ''
-			sender.onKill()
+			s.onKill()
 		}
 	}
 
 	send() {
-		sender := Sender(this.key)
-		sender.onInit()
-		this.sender := sender
+		s := Sender(this.key)
+		s.onInit()
+		this.sender := s
 	}
 }

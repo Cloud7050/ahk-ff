@@ -29,8 +29,8 @@ defineForWindows(windows, pairs) {
 		osKey := pair[1]
 		worker := pair[2]
 
-		manager
-		if !managers.HasKey(osKey) {
+		local manager
+		if !managers.Has(osKey) {
 			manager := KeyManager(osKey)
 			managers[osKey] := manager
 		} else {
@@ -42,7 +42,7 @@ defineForWindows(windows, pairs) {
 }
 
 ; Define defaults
-defineForWindows('', [
+defineForWindows([''], [
 	["F13", WorkerSimple("F5")],
 	["F14", WorkerSimple("XButton1")], ; Back
 	["F15", WorkerSimple("XButton2")], ; Forward
@@ -58,7 +58,7 @@ defineForWindows('', [
 ])
 
 ; Define FF
-defineForWindows('ffxiv_dx11.exe', [
+defineForWindows(['ffxiv_dx11.exe'], [
 	["F13", WorkerLoop("p")],
 	["F14", WorkerLoop("[")],
 	["F15", WorkerLoop("]")],

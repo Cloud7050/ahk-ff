@@ -68,6 +68,7 @@
 	}
 
 	define(windows, worker) {
+		worker.Init(this)
 		for _, window in windows {
 			this.workers[window] := worker
 		}
@@ -75,12 +76,12 @@
 
 	getWorker() {
 		activeWindowExe := WinGetProcessName("A") ; aka ahk_exe in Window Spy
-		if this.workers.HasKey(activeWindowExe) {
+		if this.workers.Has(activeWindowExe) {
 			return this.workers[activeWindowExe]
 		}
 
 		; Fallback to default worker, if any
-		if this.workers.HasKey('') {
+		if this.workers.Has('') {
 			return this.workers['']
 		}
 
