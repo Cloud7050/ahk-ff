@@ -33,16 +33,23 @@ class WorkerSimple extends Worker {
 }
 
 class WorkerApp extends Worker {
-	__New(exe) {
-		this.exe := exe
+	__New(winTitle, toRun) {
+		this.winTitle := winTitle
+		this.toRun := toRun
 	}
 
 	onStart() {
-		if WinExist("ahk_exe " this.exe) {
-			WinActivate("ahk_exe " this.exe)
+		if WinExist(this.winTitle) {
+			WinActivate(this.winTitle)
 		} else {
-			Run(this.exe)
+			Run(this.toRun)
 		}
+	}
+}
+
+class WorkerExe extends WorkerApp {
+	__New(exe) {
+		super.__New("ahk_exe " exe, exe)
 	}
 }
 

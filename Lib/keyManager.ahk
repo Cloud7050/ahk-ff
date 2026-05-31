@@ -75,9 +75,12 @@
 	}
 
 	getWorker() {
-		activeWindowExe := WinGetProcessName("A") ; aka ahk_exe in Window Spy
-		if this.workers.Has(activeWindowExe) {
-			return this.workers[activeWindowExe]
+		try {
+			focusedExe := WinGetProcessName("A") ; aka ahk_exe in Window Spy
+			if this.workers.Has(focusedExe) {
+				return this.workers[focusedExe]
+			}
+		} catch TargetError {
 		}
 
 		; Fallback to default worker, if any

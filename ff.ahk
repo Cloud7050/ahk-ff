@@ -46,10 +46,10 @@ defineForWindows([''], [
 	["F13", WorkerSimple("F5")],
 	["F14", WorkerSimple("XButton1")], ; Back
 	["F15", WorkerSimple("XButton2")], ; Forward
-	["F16", WorkerApp("firefox.exe")],
-	["F17", WorkerApp("ApplicatonFrameHost.exe")], ; To Do
-	["F18", WorkerApp("explorer.exe")],
-	["F19", WorkerApp("Discord.exe")],
+	["F16", WorkerExe("firefox.exe")],
+	["F17", WorkerApp("Microsoft To Do", A_ScriptDir "\Microsoft To Do.lnk")],
+	["F18", WorkerApp(" - File Explorer", "explorer.exe")],
+	["F19", WorkerApp("ahk_exe Discord.exe", EnvGet("LOCALAPPDATA") "\Discord\Update.exe --processStart Discord.exe")],
 	; ["F20", ''],
 	; ["F21", ''],
 	; ["F22", ''],

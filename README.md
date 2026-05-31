@@ -10,7 +10,7 @@ A lot of mouse software is lacking or buggy. I want some looping macro functiona
 ### KeyManager
 
 - Each KeyManager hooks its corresponding down and up events just once for its OS key. It does not matter whether that key is a physical keyboard key, or comes from some virtual mouse macro, only that we can perform health checks on its real pressed state, since AHK up events do not trigger consistently
-- Each KeyManager may have one or more Workers, which each define a custom behaviour. The goal of allowing multiple workers is to define different behaviours based on the active window. Thus, a KeyManager either ties a Worker to specific window classes, or uses it as the default Worker
+- Each KeyManager may have one or more Workers, which each define a custom behaviour. The goal of allowing multiple workers is to define different behaviours based on the focused window. Thus, a KeyManager either ties a Worker to specific window classes, or uses it as the default Worker
 - KeyManagers are in charge of tracking pressed state and suppressing the looping key down events from the OS. They interpret their hooked events, alongside getting notified of window focus switches, to start/stop Workers
 - When switching to a window with a different Worker, we need to decide how to manage the old and new Workers. If we imagine that our keys existed physically and think about how we'd press them when switching windows, then it makes sense to:
   - Treat any down keys as lifted (i.e. stop any old workers)
