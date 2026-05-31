@@ -5,7 +5,7 @@ A lot of mouse software is lacking or buggy. I want some looping macro functiona
 ### Main
 
 - Each OS key may have up to one KeyManager managing it. We use a map to track our OS keys' KeyManagers. When defining a key's behaviours, we either create a new KeyManager or reuse its existing one
-- We hook into a Windows DLL to listen for when the focused window changes, and notify all KeyManagers in the map each time
+- We hook into a Windows DLL to listen for when the focused window changes. KeyManagers can subscribe to get notified when needed
 
 ### KeyManager
 
@@ -19,7 +19,7 @@ A lot of mouse software is lacking or buggy. I want some looping macro functiona
 - KeyManager events:
   - Down: Handles a fired down event from the OS key
   - Up: Handles a fired up event from the OS key
-  - Switch: Handles a fired window focus switch event
+  - Switch: While down, handles a fired window focus switch event
   - Heartbeat: While down, this is the callback to poll the real pressed state of the OS key, to manually fire the up event if needed
 
 ### Worker

@@ -10,8 +10,19 @@ class Sender {
 		this.callback := ''
 	}
 
+	static down(key) {
+		info("send " key)
+		Send("{Blind}{" key " down}")
+
+		return A_TickCount
+	}
+
+	static up(key) {
+		Send("{Blind}{" key " up}")
+	}
+
 	onInit() {
-		pressedAt := this.down()
+		pressedAt := Sender.down(this.key)
 
 		this.callback := () => this.onKill()
 		setTimeout(this.callback, HOLD_FOR, PRIORITY_SENDER)
@@ -24,18 +35,7 @@ class Sender {
 			clearTimeout(this.callback)
 			this.callback := ''
 
-			this.up()
+			Sender.up(this.key)
 		}
-	}
-
-	down() {
-		info("send " this.key)
-		Send("{Blind}{" this.key " down}")
-
-		return A_TickCount
-	}
-
-	up() {
-		Send("{Blind}{" this.key " up}")
 	}
 }

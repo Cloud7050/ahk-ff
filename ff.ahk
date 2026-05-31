@@ -25,7 +25,7 @@ TraySetIcon("C:\Users\cloud\Documents\Cache\Media\Plane Clouds Square.ico")
 
 managers := Map()
 defineForWindows(windows, pairs) {
-	for i, pair in pairs {
+	for _, pair in pairs {
 		osKey := pair[1]
 		worker := pair[2]
 
