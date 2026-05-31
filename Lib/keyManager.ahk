@@ -4,6 +4,14 @@
 
 ;;; Main
 
+w := ["F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24", "SC07E"]
+; Keys we don't suppress, in an attempt to get more accurate key state. They do not interfere when allowed to pass through
+WHITELIST := Map()
+for _, key in w {
+	; Act like a Set
+	WHITELIST[key] := true
+}
+
 class KeyManager {
 	workers := Map()
 	activeWorker := ''
@@ -14,8 +22,9 @@ class KeyManager {
 	__New(osKey) {
 		this.osKey := osKey
 
-		Hotkey("*" osKey, (*) => this.onDown())
-		Hotkey("*" osKey " Up", (*) => this.onUp())
+		passthrough := WHITELIST.Has(osKey) ? "~" : ""
+		Hotkey(passthrough "*" osKey, (*) => this.onDown())
+		Hotkey(passthrough "*" osKey " Up", (*) => this.onUp())
 	}
 
 	onDown() {
