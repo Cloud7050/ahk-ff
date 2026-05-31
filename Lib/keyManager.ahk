@@ -14,8 +14,8 @@ class KeyManager {
 	__New(osKey) {
 		this.osKey := osKey
 
-		Hotkey("~*" osKey, (*) => this.onDown())
-		Hotkey("~*" osKey " Up", (*) => this.onUp())
+		Hotkey("*" osKey, (*) => this.onDown())
+		Hotkey("*" osKey " Up", (*) => this.onUp())
 	}
 
 	onDown() {
@@ -64,7 +64,8 @@ class KeyManager {
 	;TODO subscribe to switch
 
 	heartbeat() {
-		if !this.isHeld || !GetKeyState(this.osKey) {
+		; Check *physical* key state (unaffected by our hook blocking native behaviour since we didn't specify ~)
+		if !this.isHeld || !GetKeyState(this.osKey, "P") {
 			warn("MANUAL FIRE:")
 			this.onUp()
 			return false
