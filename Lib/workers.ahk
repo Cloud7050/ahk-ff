@@ -1,6 +1,7 @@
 ﻿;;; Imports
 
 #Include <sender>
+#Include <utils>
 
 ;;; Main
 
@@ -42,7 +43,11 @@ class WorkerApp extends Worker {
 		if WinExist(this.winTitle) {
 			WinActivate(this.winTitle)
 		} else {
-			Run(this.toRun)
+			try {
+				Run(this.toRun)
+			} catch OSError as e {
+				warn(e.Message e.Extra)
+			}
 		}
 	}
 }

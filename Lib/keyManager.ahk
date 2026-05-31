@@ -1,4 +1,10 @@
-﻿class KeyManager {
+﻿;;; Imports
+
+#Include <utils>
+
+;;; Main
+
+class KeyManager {
 	workers := Map()
 	activeWorker := ''
 
@@ -38,12 +44,12 @@
 				return
 			}
 
-			nextAt := ranAt + DELAY_LOOP
+			nextAt := ranAt + DELAY_HEARTBEAT
 			callback := () => beat(nextAt)
 			setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_KEY_MANAGER)
 			this.callback := callback
 		}
-		nextAt := ranAt + DELAY_LOOP
+		nextAt := ranAt + DELAY_HEARTBEAT
 		callback := () => beat(nextAt)
 		setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_KEY_MANAGER)
 		this.callback := callback
@@ -80,7 +86,8 @@
 			if this.workers.Has(focusedExe) {
 				return this.workers[focusedExe]
 			}
-		} catch TargetError {
+		} catch TargetError as e {
+			warn(e.Message e.Extra)
 		}
 
 		; Fallback to default worker, if any
