@@ -5,17 +5,15 @@
 ;;; Main
 
 class Sender {
-	this.callback := ''
+	callback := ''
 
 	__New(key) {
 		this.key := key
 	}
 
 	static down(key) {
-		info("send " key)
 		Send("{Blind}{" key " down}")
-
-		return A_TickCount
+		info("        " A_TickCount " " key)
 	}
 
 	static up(key) {
@@ -23,13 +21,11 @@ class Sender {
 	}
 
 	onInit() {
-		pressedAt := Sender.down(this.key)
+		Sender.down(this.key)
 
 		callback := () => this.onKill()
 		setTimeout(callback, DELAY_HOLD, PRIORITY_SENDER)
 		this.callback := callback
-
-		return pressedAt
 	}
 
 	onKill() {

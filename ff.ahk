@@ -31,7 +31,7 @@ defineForWindows(windows, pairs) {
 
 		manager
 		if !managers.HasKey(osKey) {
-			manager := KeyManager(osKey, worker)
+			manager := KeyManager(osKey)
 			managers[osKey] := manager
 		} else {
 			manager := managers[osKey]

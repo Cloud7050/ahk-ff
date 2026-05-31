@@ -5,7 +5,7 @@
 ;;; Main
 
 class Worker {
-	this.manager := ''
+	manager := ''
 
 	onStart() {
 	}
@@ -55,25 +55,27 @@ class WorkerLoop extends Worker {
 	}
 
 	onStart() {
-		this.reset()
-		pressedAt := this.send()
-		executeAt := pressedAt + DELAY_LOOP
+		pressedAt := A_TickCount
 
-		work(executeAt) {
+		this.reset()
+		this.send()
+
+		work(pressedAt) {
 			if (!this.manager.heartbeat()) {
 				return
 			}
 
 			this.reset()
-			pressedAt := this.send()
-			executeAt := pressedAt + DELAY_LOOP
+			this.send()
 
-			callback := () => work(executeAt)
-			setTimeout(callback, Max(1, executeAt - A_TickCount), PRIORITY_WORKER)
+			nextAt := pressedAt + DELAY_LOOP
+			callback := () => work(nextAt)
+			setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_WORKER)
 			this.callback := callback
 		}
-		callback := () => work(executeAt)
-		setTimeout(callback, Max(1, executeAt - A_TickCount), PRIORITY_WORKER)
+		nextAt := pressedAt + DELAY_LOOP
+		callback := () => work(nextAt)
+		setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_WORKER)
 		this.callback := callback
 	}
 
@@ -96,16 +98,8 @@ class WorkerLoop extends Worker {
 	}
 
 	send() {
-		if this.sender {
-			sender := this.sender
-			this.sender := ''
-			sender.onKill()
-		}
-
 		sender := Sender(this.key)
-		pressedAt := sender.onInit()
+		sender.onInit()
 		this.sender := sender
-
-		return pressedAt
 	}
 }

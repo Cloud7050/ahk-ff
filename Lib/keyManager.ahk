@@ -1,105 +1,103 @@
 ﻿class KeyManager {
-	isMasterHeld := false
+	workers := Map()
+	activeWorker := ''
 
+	isHeld := false
 	callback := ''
-	lastPressed := 0
 
-	sender := ''
+	__New(osKey) {
+		this.osKey := osKey
 
-	__New(masterKey, loopKey) {
-		this.masterKey := masterKey
-		this.loopKey := loopKey
-
-		; Hotkey("~*" masterKey, (*) => manager.onMasterDown())
-		; Hotkey("~*" masterKey " Up", (*) => manager.onMasterUp())
+		Hotkey("~*" osKey, (*) => this.onDown())
+		Hotkey("~*" osKey " Up", (*) => this.onUp())
 	}
 
-	onMasterDown() {
-		if this.isMasterHeld {
-			; Suppress OS repeats if already held
+	onDown() {
+		if this.isHeld {
 			return
 		}
+		this.isHeld := true
 
-		info("down " this.masterKey "/" this.loopKey)
-
-		this.isMasterHeld := true
-		this.doMasterDown()
+		this.doDown()
+		info("down " this.osKey)
 	}
 
-	doMasterDown() {
-		PRESS_EVERY := 250
-		HEALTH_CHECK := 25
+	doDown() {
+		ranAt := A_TickCount
 
-		; Do master up first, to be safe
-		this.doMasterUp()
-		this.send()
+		this.reset()
 
-		executeAt := this.lastPressed + PRESS_EVERY
+		worker := this.getWorker()
+		if worker {
+			worker.onStart()
+		}
+		this.activeWorker := worker
 
-		; Schedule subsequent work
-		work(executeAt) {
-			; Health check to force up event if needed
-			if (this.healthCheck()) {
-				; Abort and terminate if failed health check
+		beat(ranAt) {
+			if (!this.heartbeat()) {
 				return
 			}
 
-			; Proceed to do down work, if appropriate
-			if (A_TickCount >= executeAt) {
-				; Do master up first, to be safe
-				this.doMasterUp()
-				this.send()
-
-				executeAt := this.lastPressed + DELAY_LOOP
-			}
-
-			; Schedule subsequent work
-			callback := () => work(executeAt)
-			setTimeout(callback, Min(DELAY_HEARTBEAT, Max(1, executeAt - A_TickCount)), -2)
+			nextAt := ranAt + DELAY_LOOP
+			callback := () => beat(nextAt)
+			setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_KEY_MANAGER)
 			this.callback := callback
 		}
-		callback := () => work(executeAt)
-		setTimeout(callback, Min(HEALTH_CHECK, Max(1, executeAt - A_TickCount)), -2)
+		nextAt := ranAt + DELAY_LOOP
+		callback := () => beat(nextAt)
+		setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_KEY_MANAGER)
 		this.callback := callback
 	}
 
-	onMasterUp() {
-		info("UP " this.masterKey "/" this.loopKey)
-
-		this.doMasterUp()
-		this.isMasterHeld := false
+	onUp() {
+		this.reset()
+		this.isHeld := false
+		info("UP   " this.osKey)
 	}
 
-	doMasterUp() {
-		; Clear existing work, if any
+	;TODO subscribe to switch
+
+	heartbeat() {
+		if !this.isHeld || !GetKeyState(this.osKey) {
+			warn("MANUAL FIRE:")
+			this.onUp()
+			return false
+		}
+
+		return true
+	}
+
+	define(windows, worker) {
+		for _, window in windows {
+			this.workers[window] := worker
+		}
+	}
+
+	getWorker() {
+		activeWindowExe := WinGetProcessName("A") ; aka ahk_exe in Window Spy
+		if this.workers.HasKey(activeWindowExe) {
+			return this.workers[activeWindowExe]
+		}
+
+		; Fallback to default worker, if any
+		if this.workers.HasKey('') {
+			return this.workers['']
+		}
+
+		return ''
+	}
+
+	reset() {
+		if this.activeWorker {
+			activeWorker := this.activeWorker
+			this.activeWorker := ''
+			activeWorker.onEnd()
+		}
+
 		if this.callback {
-			clearTimeout(this.callback)
+			callback := this.callback
 			this.callback := ''
+			clearTimeout(callback)
 		}
-
-		; Clean up sender, if any
-		if this.sender {
-			this.sender.detonate()
-			this.sender := ''
-		}
-	}
-
-	healthCheck() {
-		if !this.isMasterHeld || !GetKeyState(this.masterKey) {
-			warn("FAKE TRIGGER:")
-			this.onMasterUp()
-			return true
-		}
-	}
-
-	send() {
-		if this.sender {
-			; Sender could be stale, but we always detonate (possibly early).
-			; The method should ignore late detonation if already done.
-			this.sender.detonate()
-			this.sender := ''
-		}
-
-		this.sender := Sender(this)
 	}
 }
