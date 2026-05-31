@@ -24,8 +24,8 @@ class KeyManager {
 		}
 		this.isHeld := true
 
-		this.doDown()
 		info("down " this.osKey)
+		this.doDown()
 	}
 
 	doDown() {
@@ -39,26 +39,26 @@ class KeyManager {
 		}
 		this.activeWorker := worker
 
-		beat(ranAt) {
+		helper(ranAt) {
 			if (!this.heartbeat()) {
 				return
 			}
 
 			nextAt := ranAt + DELAY_HEARTBEAT
-			callback := () => beat(nextAt)
+			callback := () => helper(nextAt)
 			setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_KEY_MANAGER)
 			this.callback := callback
 		}
 		nextAt := ranAt + DELAY_HEARTBEAT
-		callback := () => beat(nextAt)
+		callback := () => helper(nextAt)
 		setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_KEY_MANAGER)
 		this.callback := callback
 	}
 
 	onUp() {
+		info("UP   " this.osKey)
 		this.reset()
 		this.isHeld := false
-		info("UP   " this.osKey)
 	}
 
 	;TODO subscribe to switch

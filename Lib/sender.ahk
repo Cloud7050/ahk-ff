@@ -12,8 +12,8 @@ class Sender {
 	}
 
 	static down(key) {
-		Send("{Blind}{" key " down}")
 		info("        " A_TickCount " " key)
+		Send("{Blind}{" key " down}")
 	}
 
 	static up(key) {

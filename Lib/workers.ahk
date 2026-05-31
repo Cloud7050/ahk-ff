@@ -67,12 +67,12 @@ class WorkerLoop extends Worker {
 	}
 
 	onStart() {
-		pressedAt := A_TickCount
+		ranAt := A_TickCount
 
 		this.reset()
 		this.send()
 
-		work(pressedAt) {
+		helper(ranAt) {
 			if (!this.manager.heartbeat()) {
 				return
 			}
@@ -80,13 +80,13 @@ class WorkerLoop extends Worker {
 			this.reset()
 			this.send()
 
-			nextAt := pressedAt + DELAY_LOOP
-			callback := () => work(nextAt)
+			nextAt := ranAt + DELAY_LOOP
+			callback := () => helper(nextAt)
 			setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_WORKER)
 			this.callback := callback
 		}
-		nextAt := pressedAt + DELAY_LOOP
-		callback := () => work(nextAt)
+		nextAt := ranAt + DELAY_LOOP
+		callback := () => helper(nextAt)
 		setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_WORKER)
 		this.callback := callback
 	}
