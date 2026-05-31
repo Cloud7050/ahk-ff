@@ -56,8 +56,8 @@ defineForWindows([''], [
 	; ["F23", ''],
 	; ["F24", ''],
 
-	["AppsKey", WorkerLoop("WheelLeft", DELAY_LOOP_SCROLL)],
-	["SC07E", WorkerLoop("WheelRight", DELAY_LOOP_SCROLL)],
+	["AppsKey", WorkerLoop("WheelLeft", DELAY_LOOP_SCROLL, DELAY_HOLD_SCROLL)],
+	["SC07E", WorkerLoop("WheelRight", DELAY_LOOP_SCROLL, DELAY_HOLD_SCROLL)],
 ])
 
 ; Define FF

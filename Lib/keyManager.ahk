@@ -4,7 +4,7 @@
 
 ;;; Main
 
-w := ["F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24", "SC07E"]
+w := ["F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24"]
 ; Keys we don't suppress, in an attempt to get more accurate key state. They do not interfere when allowed to pass through
 WHITELIST := Map()
 for _, key in w {
