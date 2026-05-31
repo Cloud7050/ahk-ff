@@ -62,8 +62,10 @@ class WorkerLoop extends Worker {
 	callback := ''
 	sender := ''
 
-	__New(key) {
+	__New(key, delayLoop := DELAY_LOOP, delayHold := DELAY_HOLD) {
 		this.key := key
+		this.delayLoop := delayLoop
+		this.delayHold := delayHold
 	}
 
 	onStart() {
@@ -80,12 +82,12 @@ class WorkerLoop extends Worker {
 			this.reset()
 			this.send()
 
-			nextAt := ranAt + DELAY_LOOP
+			nextAt := ranAt + this.delayLoop
 			callback := () => helper(nextAt)
 			setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_WORKER)
 			this.callback := callback
 		}
-		nextAt := ranAt + DELAY_LOOP
+		nextAt := ranAt + this.delayLoop
 		callback := () => helper(nextAt)
 		setTimeout(callback, Max(1, nextAt - A_TickCount), PRIORITY_WORKER)
 		this.callback := callback
@@ -110,7 +112,7 @@ class WorkerLoop extends Worker {
 	}
 
 	send() {
-		s := Sender(this.key)
+		s := Sender(this.key, this.delayHold)
 		s.onInit()
 		this.sender := s
 	}

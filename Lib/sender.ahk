@@ -7,13 +7,14 @@
 class Sender {
 	callback := ''
 
-	__New(key) {
+	__New(key, delay) {
 		this.key := key
+		this.delay := delay
 	}
 
 	static down(key) {
-		info("        " A_TickCount " " key)
 		Send("{Blind}{" key " down}")
+		info("        " A_TickCount " " key)
 	}
 
 	static up(key) {
@@ -24,7 +25,7 @@ class Sender {
 		Sender.down(this.key)
 
 		callback := () => this.onKill()
-		setTimeout(callback, DELAY_HOLD, PRIORITY_SENDER)
+		setTimeout(callback, this.delay, PRIORITY_SENDER)
 		this.callback := callback
 	}
 

@@ -5,9 +5,12 @@ DELAY_HEARTBEAT := 25
 
 ; How often WorkerLoop should construct a new Sender
 DELAY_LOOP := 250
+DELAY_LOOP_SCROLL := 150
+DELAY_LOOP_FF := 100
 
 ; How long Sender should wait before releasing its key by default
 DELAY_HOLD := 100
+DELAY_HOLD_FF := 66
 
 ; Thread priorities
 

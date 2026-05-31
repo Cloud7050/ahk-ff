@@ -55,6 +55,11 @@ defineForWindows([''], [
 	; ["F22", ''],
 	; ["F23", ''],
 	; ["F24", ''],
+
+	; Looks like ctrl + scroll lock becomes ctrlbreak as expected, but ctrl + pause stays as pause
+	["ScrollLock", WorkerLoop("WheelLeft", DELAY_LOOP_SCROLL)],
+	["CtrlBreak", WorkerLoop("WheelLeft", DELAY_LOOP_SCROLL)],
+	["Pause", WorkerLoop("WheelRight", DELAY_LOOP_SCROLL)],
 ])
 
 ; Define FF
@@ -71,4 +76,8 @@ defineForWindows(['ffxiv_dx11.exe'], [
 	["F22", WorkerLoop("F10")],
 	["F23", WorkerLoop("F11")],
 	["F24", WorkerLoop("F12")],
+
+	["ScrollLock", WorkerLoop("9", DELAY_LOOP_FF, DELAY_HOLD_FF)], ; LB, bound to pinky key
+	["CtrlBreak", WorkerLoop("9", DELAY_LOOP_FF, DELAY_HOLD_FF)],
+	["Pause", WorkerLoop("f", DELAY_LOOP_FF, DELAY_HOLD_FF)], ; Sprint
 ])
