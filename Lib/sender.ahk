@@ -1,35 +1,41 @@
-﻿class Sender {
-	__New(manager) {
-		this.manager := manager
-		this.key := manager.loopKey
+﻿;;; Imports
 
-		; Down now
-		this.down()
+#Include <utils>
 
-		; Schedule up
-		HOLD_FOR := 100
+;;; Main
 
-		this.callback := () => this.detonate()
-		setTimeout(this.callback, HOLD_FOR, -1)
+class Sender {
+	__New(key) {
+		this.key := key
+		this.callback := ''
 	}
 
-	down() {
-		info("send " this.key)
+	onInit() {
+		pressedAt := this.down()
 
-		this.manager.lastPressed := A_TickCount
-		Send("{Blind}{" this.key " down}")
+		this.callback := () => this.onKill()
+		setTimeout(this.callback, HOLD_FOR, PRIORITY_SENDER)
+
+		return pressedAt
 	}
 
-	up() {
-		Send("{Blind}{" this.key " up}")
-	}
-
-	detonate() {
+	onKill() {
 		if this.callback {
 			clearTimeout(this.callback)
 			this.callback := ''
 
 			this.up()
 		}
+	}
+
+	down() {
+		info("send " this.key)
+		Send("{Blind}{" this.key " down}")
+
+		return A_TickCount
+	}
+
+	up() {
+		Send("{Blind}{" this.key " up}")
 	}
 }

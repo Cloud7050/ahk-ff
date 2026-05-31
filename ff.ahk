@@ -14,15 +14,15 @@ Critical()
 ; Set custom tray icon
 TraySetIcon("C:\Users\cloud\Documents\Cache\Media\Plane Clouds Square.ico")
 
-; Imports
+;;; Imports
+
 #Include <keyManager>
 #Include <workers>
 #Include <sender>
 #Include <utils>
 
+;;; Main
 
-
-; Main
 managers := Map()
 defineForWindows(windows, pairs) {
 	for i, pair in pairs {

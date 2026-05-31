@@ -34,5 +34,5 @@ A lot of mouse software is lacking or buggy. I want some looping macro functiona
 - Senders are used by Workers to both perform an initial key down *and* schedule (or later force) a subsequent automatic key up
 - Senders are like useful standalone runnables that abstract away their internal timeout
 - Sender events:
-  - Init: The instruction to begin the Sender's behaviour, automatically run on construction
+  - Init: The instruction to begin the Sender's behaviour
   - Kill: The instruction to kill the Sender's behaviour, which may be called early
