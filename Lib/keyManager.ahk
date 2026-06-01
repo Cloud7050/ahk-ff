@@ -22,10 +22,9 @@ class KeyManager {
 	__New(osKey) {
 		this.osKey := osKey
 
-		passthrough := WHITELIST.Has(osKey) ? "~" : ""
-		; Force keyboard hooks for all to attempt to improve reliability
-		Hotkey(passthrough "*$" osKey, (*) => this.onDown())
-		Hotkey(passthrough "*$" osKey " Up", (*) => this.onUp())
+		passthrough := this.isWhitelisted() ? "~" : ""
+		Hotkey(passthrough "*" osKey, (*) => this.onDown())
+		Hotkey(passthrough "*" osKey " Up", (*) => this.onUp())
 	}
 
 	onDown() {
@@ -74,14 +73,24 @@ class KeyManager {
 	;TODO subscribe to switch
 
 	heartbeat() {
-		; Check *physical* key state (unaffected by our hook blocking native behaviour since we didn't specify ~)
-		if !this.isHeld || !GetKeyState(this.osKey, "P") {
+		if !this.isHeld || !this.isPressed() {
 			warn("MANUAL FIRE:")
 			this.onUp()
 			return false
 		}
 
 		return true
+	}
+
+	isWhitelisted() {
+		return WHITELIST.Has(this.osKey)
+	}
+
+	isPressed() {
+		; If not suppressed, logical state will suffice over physical state, which seems more accurate for us
+		return this.isWhitelisted()
+			? GetKeyState(this.osKey)
+			: GetKeyState(this.osKey, "P")
 	}
 
 	define(windows, worker) {
