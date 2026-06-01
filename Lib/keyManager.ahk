@@ -23,8 +23,9 @@ class KeyManager {
 		this.osKey := osKey
 
 		passthrough := WHITELIST.Has(osKey) ? "~" : ""
-		Hotkey(passthrough "*" osKey, (*) => this.onDown())
-		Hotkey(passthrough "*" osKey " Up", (*) => this.onUp())
+		; Force keyboard hooks for all to attempt to improve reliability
+		Hotkey(passthrough "*$" osKey, (*) => this.onDown())
+		Hotkey(passthrough "*$" osKey " Up", (*) => this.onUp())
 	}
 
 	onDown() {
