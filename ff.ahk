@@ -12,7 +12,7 @@ ProcessSetPriority("High")
 Critical()
 
 ; Set custom tray icon
-TraySetIcon("C:\Users\cloud\Documents\Cache\Media\Plane Clouds Square.ico")
+TraySetIcon("C:\Users\P1373637\Documents\Cache\zMedia\Plane Clouds Square.ico")
 
 ;;; Imports
 
@@ -49,8 +49,8 @@ defineForWindows([''], [
 	["F16", WorkerExe("firefox.exe")],
 	["F17", WorkerApp("Microsoft To Do", A_ScriptDir "\Microsoft To Do.lnk")],
 	["F18", WorkerApp(" - File Explorer", "explorer.exe")],
-	["F19", WorkerApp("ahk_exe Discord.exe", EnvGet("LOCALAPPDATA") "\Discord\Update.exe --processStart Discord.exe")],
-	; ["F20", ''],
+	["F19", WorkerExe("ms-teams.exe")],
+	["F20", WorkerExe("Code.exe")],
 	; ["F21", ''],
 	; ["F22", ''],
 	; ["F23", ''],
@@ -58,23 +58,4 @@ defineForWindows([''], [
 
 	["AppsKey", WorkerLoop("WheelLeft", DELAY_LOOP_SCROLL, DELAY_HOLD_SCROLL)],
 	["SC07E", WorkerLoop("WheelRight", DELAY_LOOP_SCROLL, DELAY_HOLD_SCROLL)],
-])
-
-; Define FF
-defineForWindows(['ffxiv_dx11.exe'], [
-	["F13", WorkerLoop("p")],
-	["F14", WorkerLoop("[")],
-	["F15", WorkerLoop("]")],
-	["F16", WorkerLoop("F4")],
-	["F17", WorkerLoop("F5")],
-	["F18", WorkerLoop("F6")],
-	["F19", WorkerLoop("F7")],
-	["F20", WorkerLoop("F8")],
-	["F21", WorkerLoop("F9")],
-	["F22", WorkerLoop("F10")],
-	["F23", WorkerLoop("F11")],
-	["F24", WorkerLoop("F12")],
-
-	["AppsKey", WorkerLoop("9", DELAY_LOOP_FF, DELAY_HOLD_FF)], ; LB, bound to pinky key
-	["SC07E", WorkerLoop("f", DELAY_LOOP_FF, DELAY_HOLD_FF)], ; Sprint
 ])
