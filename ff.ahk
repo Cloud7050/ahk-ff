@@ -78,3 +78,22 @@ defineForWindows(['ffxiv_dx11.exe'], [
 	["AppsKey", WorkerLoop("9", DELAY_LOOP_FF, DELAY_HOLD_FF)], ; LB, bound to pinky key
 	["SC07E", WorkerLoop("f", DELAY_LOOP_FF, DELAY_HOLD_FF)], ; Sprint
 ])
+
+; Define PoE2
+defineForWindows(['PathOfExileSteam.exe'], [
+	["F13", WorkerSimple("F5")],
+	["F14", WorkerSimple("XButton1")],
+	["F15", WorkerSimple("XButton2")],
+	["F16", WorkerSimple(";")],
+	["F17", WorkerSimple("'")],
+	["F18", WorkerSimple("F6")],
+	["F19", WorkerSimple("F7")],
+	["F20", WorkerSimple("F8")],
+	["F21", WorkerSimple("F9")],
+	["F22", WorkerSimple("F10")],
+	["F23", WorkerSimple("F11")],
+	["F24", WorkerSimple("F12")],
+
+	["AppsKey", WorkerSimple("[")],
+	["SC07E", WorkerSimple("]")],
+])
